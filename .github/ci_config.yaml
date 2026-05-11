@@ -29,6 +29,7 @@ platforms:
         type: inferencetest
         resources:
           ngpus: 4
+          gpu_style: nvidia
           shm_size: 64g
           timeout: 3600
         env:
