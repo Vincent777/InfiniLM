@@ -1,0 +1,208 @@
+repo:
+  url: https://github.com/Vincent777/InfiniLM.git
+  branch: main
+
+github:
+  status_context_prefix: "ci/infinilm"
+
+platforms:
+  nvidia:
+    image:
+      dockerfile: images/nvidia/
+      build_args:
+        BASE_IMAGE: nvcr.io/nvidia/pytorch:25.12-py3
+    docker_args:
+      - "--gpus all"
+      - "-u root"
+      - "--network host"
+      - "--privileged"
+      - "--cap-add=ALL"
+      - "--pid=host"
+      - "--ipc=host"
+      - "--workdir=/workspace"
+    volumes:
+      - /data:/data
+      - /data-aisoft:/data-aisoft
+    setup: pip install .[dev] --no-build-isolation
+    jobs:
+      gpu_inferencetest:
+        type: inferencetest
+        resources:
+          ngpus: 4
+          shm_size: 64g
+          timeout: 3600
+        env:
+          TEST_PARAM: "['single']='' ['distribute']='4'"
+        stages:
+          - name: test
+            run: python scripts/jiuge.py --nvidia /data-aisoft/mechdancer/models/9g_8b_thinking_llama/
+      # gpu_benchtest:
+      #   type: benchtest
+      #   resources:
+      #     shm_size: 80g
+      #   env:
+      #     MODEL_LIST: Qwen3-32B-FP8
+      #     IMAGE: v0.10.0
+      #     ENGINE: vLLM
+      #     TEST_PARAM: "['default']='' ['paged-attn']='--enable-paged-attn' ['paged-attn_graph']='--enable-paged-attn --enable-graph' ['paged-attn_graph_flash-attn']='--enable-paged-attn --enable-graph --attn=flash-attn'"
+      #   stages:
+      #     - name: test
+      #       run: python examples/bench.py --device nvidia --model=/data-aisoft/mechdancer/models/9g_8b_thinking_llama/ --input-len=256,1024 --output-len=256,1024 --batch-size=8
+      # gpu_accuracytest:
+      #   type: accuracytest
+      #   resources:
+      #     shm_size: 80g
+      #   env:
+      #     MODEL_LIST: Qwen3-32B-FP8
+      #     IMAGE: v0.10.0
+      #     ENGINE: vLLM
+      #     TEST_PARAM: "['default']='' ['paged-attn_graph']='--enable-paged-attn --enable-graph'"
+      #   stages:
+      #     - name: test
+      #       run: python test/bench/test_benchmark.py --device nvidia --model /data-aisoft/mechdancer/models/9g_8b_thinking_llama/ --bench mmlu --backend cpp --max-new-tokens 5 --cache-dir /data-aisoft/pepe/datasets/ --split=val
+      # gpu_servicetest:
+      #   type: servicetest
+      #   resources:
+      #     shm_size: 80g
+      #   env:
+      #     MODEL_LIST: Qwen3-32B-FP8
+      #     IMAGE: v0.10.0
+      #     ENGINE: vLLM
+      #     TEST_PARAM: "['static_cache']='' ['paged-cache']='--enable-paged-attn --cache-type=paged' ['paged-cache_graph']='--enable-paged-attn --cache-type=paged --enable-graph'"
+      #   stages:
+      #     - name: test
+      #       run: python scripts/test_perf.py --verbose
+
+  # iluvatar:
+  #   image:
+  #     dockerfile: images/iluvatar/
+  #     build_args:
+  #       BASE_IMAGE: corex:qs_pj20250825
+  #       APT_MIRROR: http://archive.ubuntu.com/ubuntu
+  #       PIP_INDEX_URL: https://pypi.org/simple
+  #   docker_args:
+  #     - "--privileged"
+  #     - "--cap-add=ALL"
+  #     - "--pid=host"
+  #     - "--ipc=host"
+  #   volumes:
+  #     - /dev:/dev
+  #     - /lib/firmware:/lib/firmware
+  #     - /usr/src:/usr/src
+  #     - /lib/modules:/lib/modules
+  #   setup: pip install .[dev] --no-build-isolation
+  #   jobs:
+  #     gpu:
+  #       type: unittest
+  #       resources:
+  #         ngpus: 1
+  #         gpu_style: none
+  #         memory: 32GB
+  #         shm_size: 16g
+  #         timeout: 3600
+  #       stages:
+  #         - name: test
+  #           run: pytest tests/ -n 8 -v --tb=short --junitxml=/workspace/results/test-results.xml
+
+  # metax:
+  #   image:
+  #     dockerfile: images/metax/
+  #     build_args:
+  #       BASE_IMAGE: cr.metax-tech.com/public-library/maca-pytorch:3.2.1.4-torch2.4-py310-ubuntu22.04-amd64
+  #       APT_MIRROR: http://archive.ubuntu.com/ubuntu
+  #       PIP_INDEX_URL: https://pypi.org/simple
+  #   docker_args:
+  #     - "--privileged"
+  #     - "--ulimit=memlock=-1"
+  #     - "--ulimit=stack=67108864"
+  #   setup: pip install .[dev] --no-build-isolation
+  #   jobs:
+  #     gpu:
+  #       type: unittest
+  #       resources:
+  #         ngpus: 1
+  #         gpu_style: none                  # MetaX: passthrough via --privileged, CUDA_VISIBLE_DEVICES controls visibility
+  #         memory: 32GB
+  #         shm_size: 16g
+  #         timeout: 3600
+  #       stages:
+  #         - name: test
+  #           run: pytest tests/ -n 4 -v --tb=short --junitxml=/workspace/results/test-results.xml
+
+  # moore:
+  #   image:
+  #     dockerfile: images/moore/
+  #     build_args:
+  #       BASE_IMAGE: sh-harbor.mthreads.com/mcctest/vllm_musa:20251112_hygon
+  #       APT_MIRROR: http://archive.ubuntu.com/ubuntu
+  #       PIP_INDEX_URL: https://pypi.org/simple
+  #   docker_args:
+  #     - "--privileged"
+  #   setup: pip install .[dev] --no-build-isolation
+  #   jobs:
+  #     gpu:
+  #       type: unittest
+  #       resources:
+  #         ngpus: 1
+  #         gpu_style: none                  # Moore: passthrough via --privileged, MTHREADS_VISIBLE_DEVICES controls visibility
+  #         memory: 32GB
+  #         shm_size: 16g
+  #         timeout: 3600
+  #       stages:
+  #         - name: test
+  #           run: pytest tests/test_add.py tests/test_gemm.py tests/test_swiglu.py -n 4 -v --tb=short --junitxml=/workspace/results/test-results.xml
+
+  # cambricon:
+  #   image:
+  #     dockerfile: images/cambricon/
+  #     build_args:
+  #       BASE_IMAGE: cambricon/pytorch:v1.25.3-torch2.1-anolisos8.8-py310
+  #       PIP_INDEX_URL: https://pypi.org/simple
+  #   docker_args:
+  #     - "--privileged"
+  #   setup: pip install .[dev] --no-build-isolation
+  #   jobs:
+  #     gpu:
+  #       type: unittest
+  #       resources:
+  #         ngpus: 1
+  #         gpu_style: mlu                   # Cambricon: passthrough via --privileged, MLU_VISIBLE_DEVICES for device control
+  #         memory: 32GB
+  #         shm_size: 16g
+  #         timeout: 3600
+  #       stages:
+  #         - name: test
+  #           run: pytest tests/test_gemm.py -n 4 -v --tb=short --junitxml=/workspace/results/test-results.xml
+
+  # ascend:
+  #   image:
+  #     dockerfile: images/ascend/
+  #     build_args:
+  #       BASE_IMAGE: quay.io/ascend/vllm-ascend:v0.18.0rc1-openeuler
+  #       PIP_INDEX_URL: https://pypi.org/simple
+  #   docker_args:
+  #     - "--runtime=runc"
+  #     - "--privileged"
+  #     - "--device=/dev/davinci0"
+  #     - "--device=/dev/davinci_manager"
+  #     - "--device=/dev/devmm_svm"
+  #     - "--device=/dev/hisi_hdc"
+  #   volumes:
+  #     - /usr/local/Ascend/driver:/usr/local/Ascend/driver:ro
+  #     - /usr/local/dcmi:/usr/local/dcmi:ro
+  #     - /usr/local/bin/npu-smi:/usr/local/bin/npu-smi:ro
+  #   env:
+  #     ASCEND_HOME_PATH: /usr/local/Ascend/ascend-toolkit/latest
+  #   setup: pip install .[dev] --no-build-isolation
+  #   jobs:
+  #     npu:
+  #       type: unittest
+  #       resources:
+  #         ngpus: 1
+  #         gpu_style: none
+  #         memory: 32GB
+  #         shm_size: 16g
+  #         timeout: 3600
+  #       stages:
+  #         - name: test
+  #           run: pytest tests/ -n 1 --devices ascend -v --tb=short --junitxml=/workspace/results/test-results.xml
