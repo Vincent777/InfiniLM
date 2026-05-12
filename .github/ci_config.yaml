@@ -36,7 +36,7 @@ platforms:
         stages:
           - name: test
             run: python scripts/jiuge.py --nvidia /data-aisoft/mechdancer/models/9g_8b_thinking_llama/ <TEST_PARAM>
-      # gpu_benchtest:
+      # gpu_benchtest: 
       #   type: benchtest
       #   resources:
       #     shm_size: 80g
