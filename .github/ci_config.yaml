@@ -12,8 +12,8 @@ platforms:
       build_args:
         BASE_IMAGE: nvcr.io/nvidia/pytorch:25.12-py3
     docker_args:
-      - "-u root"
-      - "--network host"
+      - "--user=root"
+      - "--network=host"
       - "--privileged"
       - "--cap-add=ALL"
       - "--pid=host"
