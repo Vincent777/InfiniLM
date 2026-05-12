@@ -64,7 +64,7 @@ platforms:
         stages:
           - name: test
             run: python test/bench/test_benchmark.py --device nvidia --model /data-aisoft/mechdancer/models/9g_8b_thinking_llama/ --bench mmlu --backend cpp --max-new-tokens 5 --cache-dir /data-aisoft/pepe/datasets/ --split=val <TEST_PARAM>
-      # gpu_servicetest: 
+      # gpu_servicetest:
       #   type: servicetest
       #   resources:
       #     shm_size: 80g
