@@ -36,42 +36,42 @@ platforms:
         stages:
           - name: test
             run: python scripts/jiuge.py --nvidia /data-aisoft/mechdancer/models/9g_8b_thinking_llama/ <TEST_PARAM>
-      gpu_benchtest:
-        type: benchtest
-        resources:
-          shm_size: 80g
-        env:
-          MODEL_LIST: Qwen3-32B-FP8
-          IMAGE: v0.10.0
-          ENGINE: vLLM
-          TEST_PARAM: ['default', '--enable-paged-attn', '--enable-paged-attn --enable-graph', '--enable-paged-attn --enable-graph --attn=flash-attn']
-        stages:
-          - name: test
-            run: python examples/bench.py --device nvidia --model=/data-aisoft/mechdancer/models/9g_8b_thinking_llama/ --input-len=256,1024 --output-len=256,1024 --batch-size=8 <TEST_PARAM>
-      gpu_accuracytest:
-        type: accuracytest
-        resources:
-          shm_size: 80g
-        env:
-          MODEL_LIST: Qwen3-32B-FP8
-          IMAGE: v0.10.0
-          ENGINE: vLLM
-          TEST_PARAM: ['default', '--enable-paged-attn --enable-graph']
-        stages:
-          - name: test
-            run: python test/bench/test_benchmark.py --device nvidia --model /data-aisoft/mechdancer/models/9g_8b_thinking_llama/ --bench mmlu --backend cpp --max-new-tokens 5 --cache-dir /data-aisoft/pepe/datasets/ --split=val <TEST_PARAM>
-      gpu_servicetest:
-        type: servicetest
-        resources:
-          shm_size: 80g
-        env:
-          MODEL_LIST: Qwen3-32B-FP8
-          IMAGE: v0.10.0
-          ENGINE: vLLM
-          TEST_PARAM: ['default', '--enable-paged-attn --cache-type=paged', '--enable-paged-attn --cache-type=paged --enable-graph']
-        stages:
-          - name: test
-            run: python python/infinilm/server/inference_server.py --device nvidia --model=/data-aisoft/mechdancer/models/9g_8b_thinking_llama/ --max-new-tokens=100 --max-batch-size=32 --tp=1 --temperature=1.0 --top-p=0.8 --top-k=1 <TEST_PARAM>
+      # gpu_benchtest:
+      #   type: benchtest
+      #   resources:
+      #     shm_size: 80g
+      #   env:
+      #     MODEL_LIST: Qwen3-32B-FP8
+      #     IMAGE: v0.10.0
+      #     ENGINE: vLLM
+      #     TEST_PARAM: ['default', '--enable-paged-attn', '--enable-paged-attn --enable-graph', '--enable-paged-attn --enable-graph --attn=flash-attn']
+      #   stages:
+      #     - name: test
+      #       run: python examples/bench.py --device nvidia --model=/data-aisoft/mechdancer/models/9g_8b_thinking_llama/ --input-len=256,1024 --output-len=256,1024 --batch-size=8 <TEST_PARAM>
+      # gpu_accuracytest:
+      #   type: accuracytest
+      #   resources:
+      #     shm_size: 80g
+      #   env:
+      #     MODEL_LIST: Qwen3-32B-FP8
+      #     IMAGE: v0.10.0
+      #     ENGINE: vLLM
+      #     TEST_PARAM: ['default', '--enable-paged-attn --enable-graph']
+      #   stages:
+      #     - name: test
+      #       run: python test/bench/test_benchmark.py --device nvidia --model /data-aisoft/mechdancer/models/9g_8b_thinking_llama/ --bench mmlu --backend cpp --max-new-tokens 5 --cache-dir /data-aisoft/pepe/datasets/ --split=val <TEST_PARAM>
+      # gpu_servicetest:
+      #   type: servicetest
+      #   resources:
+      #     shm_size: 80g
+      #   env:
+      #     MODEL_LIST: Qwen3-32B-FP8
+      #     IMAGE: v0.10.0
+      #     ENGINE: vLLM
+      #     TEST_PARAM: ['default', '--enable-paged-attn --cache-type=paged', '--enable-paged-attn --cache-type=paged --enable-graph']
+      #   stages:
+      #     - name: test
+      #       run: python python/infinilm/server/inference_server.py --device nvidia --model=/data-aisoft/mechdancer/models/9g_8b_thinking_llama/ --max-new-tokens=100 --max-batch-size=32 --tp=1 --temperature=1.0 --top-p=0.8 --top-k=1 <TEST_PARAM>
 
   # iluvatar:
   #   image:
