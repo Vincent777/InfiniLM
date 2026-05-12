@@ -72,7 +72,7 @@ platforms:
         stages:
           - name: test
             run: python python/infinilm/server/inference_server.py --device nvidia --model=/data-aisoft/mechdancer/models/9g_8b_thinking_llama/ --max-new-tokens=100 --max-batch-size=32 --tp=1 --temperature=1.0 --top-p=0.8 --top-k=1 <TEST_PARAM>
-  
+
   # iluvatar:
   #   image:
   #     dockerfile: images/iluvatar/
