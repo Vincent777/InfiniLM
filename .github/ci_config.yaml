@@ -32,7 +32,7 @@ platforms:
           shm_size: 64g
           timeout: 3600
         env:
-          TEST_PARAM: "['single']='',['distribute']='4'"
+          TEST_PARAM: "[single]=1,[distribute]=4"
         stages:
           - name: test
             run: python scripts/jiuge.py --nvidia /data-aisoft/mechdancer/models/9g_8b_thinking_llama/
