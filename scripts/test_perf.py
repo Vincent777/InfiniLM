@@ -29,7 +29,6 @@ PROMPTS = [
 
 NUM_REQUESTS = 64
 CONCURRENCY = 20
-API_URL = "http://127.0.0.1:8000"
 MODEL = "FM9G-7B"
 
 
@@ -108,7 +107,8 @@ async def benchmark_user(client, semaphore, queue, results, user_id, verbose):
                 queue.task_done()
 
 
-async def run_benchmark(verbose=False):
+async def run_benchmark(server_port, verbose=False):
+    API_URL=f"http://127.0.0.1:{server_port}"
     client = AsyncOpenAI(base_url=API_URL, api_key="default")
     semaphore = asyncio.Semaphore(CONCURRENCY)
     queue = asyncio.Queue()
@@ -174,7 +174,8 @@ async def run_benchmark(verbose=False):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
+    parser.add_argument("--port", action="server port number")
     parser.add_argument("--verbose", action="store_true")
     args = parser.parse_args()
 
-    asyncio.run(run_benchmark(args.verbose))
+    asyncio.run(run_benchmark(args.port, args.verbose))
