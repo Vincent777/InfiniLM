@@ -22,7 +22,7 @@ platforms:
     volumes:
       - /data:/data
       - /data-aisoft:/data-aisoft
-      - /data-aisoft/artifacts/CI_nvidia_test/<WORKSPACE>:/workspace
+      - /data-aisoft/artifacts/CI_nvidia_test/WORKSPACE:/workspace
     setup: pip install .[dev] --no-build-isolation
     jobs:
       gpu_inferencetest:
