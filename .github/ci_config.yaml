@@ -22,7 +22,7 @@ platforms:
     volumes:
       - /data:/data
       - /data-aisoft:/data-aisoft
-      - /data-aisoft/artifacts/CI_nvidia_test/[WORKSPACE]:/workspace
+      - /data-aisoft/artifacts/CI_nvidia_test/__WORKSPACE__:/workspace
     setup: pip install .[dev] --no-build-isolation
     jobs:
       gpu_inferencetest:
@@ -84,7 +84,7 @@ platforms:
   #     - /lib/firmware:/lib/firmware
   #     - /usr/src:/usr/src
   #     - /lib/modules:/lib/modules
-  #     - /data-aisoft/artifacts/CI_iluvatar_test/<WORKSPACE>:/workspace
+  #     - /data-aisoft/artifacts/CI_iluvatar_test/__WORKSPACE__:/workspace
   #   setup: pip install .[dev] --no-build-isolation
   #   jobs:
   #     gpu:
@@ -186,7 +186,7 @@ platforms:
   #     - /usr/local/Ascend/driver:/usr/local/Ascend/driver:ro
   #     - /usr/local/dcmi:/usr/local/dcmi:ro
   #     - /usr/local/bin/npu-smi:/usr/local/bin/npu-smi:ro
-  #     - /data-aisoft/artifacts/CI_ascend_test/<WORKSPACE>:/workspace
+  #     - /data-aisoft/artifacts/CI_ascend_test/__WORKSPACE__:/workspace
   #   env:
   #     ASCEND_HOME_PATH: /usr/local/Ascend/ascend-toolkit/latest
   #   setup: pip install .[dev] --no-build-isolation
