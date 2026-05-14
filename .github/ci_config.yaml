@@ -60,7 +60,6 @@ platforms:
       gpu_servicetest:
         type: servicetest
         resources:
-          ngpus: 1
           shm_size: 64g
         env:
           MODEL_LIST: 9g_8b_thinking_llama
