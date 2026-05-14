@@ -22,20 +22,19 @@ platforms:
     volumes:
       - /data:/data
       - /data-aisoft:/data-aisoft
+      - /data-aisoft/artifacts/CI_nvidia_test/<WORKSPACE>:/workspace
     setup: pip install .[dev] --no-build-isolation
     jobs:
       gpu_inferencetest:
         type: inferencetest
         resources:
-          ngpus: 4
+          ngpus: [1, 4]
           gpu_style: nvidia
           shm_size: 64g
           timeout: 3600
-        env:
-          TEST_PARAM: ['default', '--tp=4']
         stages:
           - name: test
-            run: python scripts/jiuge.py --nvidia /data-aisoft/mechdancer/models/9g_8b_thinking_llama/ <TEST_PARAM>
+            run: python scripts/jiuge.py --nvidia /data-aisoft/mechdancer/models/9g_8b_thinking_llama/
       gpu_benchtest:
         type: benchtest
         resources:
@@ -43,9 +42,6 @@ platforms:
           shm_size: 64g
           timeout: 3600
         env:
-          MODEL_LIST: Qwen3-32B-FP8
-          IMAGE: v0.10.0
-          ENGINE: vLLM
           TEST_PARAM: ['default', '--enable-paged-attn', '--enable-paged-attn --enable-graph', '--enable-paged-attn --enable-graph --attn=flash-attn']
         stages:
           - name: test
@@ -55,27 +51,21 @@ platforms:
         resources:
           gpu_style: nvidia
           shm_size: 64g
-          timeout: 3600  
+          timeout: 3600
         env:
-          MODEL_LIST: Qwen3-32B-FP8
-          IMAGE: v0.10.0
-          ENGINE: vLLM
           TEST_PARAM: ['default', '--enable-paged-attn --enable-graph']
         stages:
           - name: test
             run: python test/bench/test_benchmark.py --device nvidia --model /data-aisoft/mechdancer/models/9g_8b_thinking_llama/ --bench mmlu --backend cpp --max-new-tokens 5 --cache-dir /data-aisoft/pepe/datasets/ --split=val <TEST_PARAM>
-      # gpu_servicetest:
-      #   type: servicetest
-      #   resources:
-      #     shm_size: 80g
-      #   env:
-      #     MODEL_LIST: Qwen3-32B-FP8
-      #     IMAGE: v0.10.0
-      #     ENGINE: vLLM
-      #     TEST_PARAM: ['default', '--enable-paged-attn --cache-type=paged', '--enable-paged-attn --cache-type=paged --enable-graph']
-      #   stages:
-      #     - name: test
-      #       run: python python/infinilm/server/inference_server.py --device nvidia --model=/data-aisoft/mechdancer/models/9g_8b_thinking_llama/ --max-new-tokens=100 --max-batch-size=32 --tp=1 --temperature=1.0 --top-p=0.8 --top-k=1 <TEST_PARAM>
+      gpu_servicetest:
+        type: servicetest
+        resources:
+          ngpus: 1
+          shm_size: 64g
+        env:
+          MODEL_LIST: 9g_8b_thinking_llama
+          ENGINE: InfiniLM
+          TEST_PARAM: ['default', '--enable-paged-attn --cache-type=paged', '--enable-paged-attn --cache-type=paged --enable-graph']
 
   # iluvatar:
   #   image:
@@ -94,6 +84,7 @@ platforms:
   #     - /lib/firmware:/lib/firmware
   #     - /usr/src:/usr/src
   #     - /lib/modules:/lib/modules
+  #     - /data-aisoft/artifacts/CI_iluvatar_test/<WORKSPACE>:/workspace
   #   setup: pip install .[dev] --no-build-isolation
   #   jobs:
   #     gpu:
@@ -195,6 +186,7 @@ platforms:
   #     - /usr/local/Ascend/driver:/usr/local/Ascend/driver:ro
   #     - /usr/local/dcmi:/usr/local/dcmi:ro
   #     - /usr/local/bin/npu-smi:/usr/local/bin/npu-smi:ro
+  #     - /data-aisoft/artifacts/CI_ascend_test/<WORKSPACE>:/workspace
   #   env:
   #     ASCEND_HOME_PATH: /usr/local/Ascend/ascend-toolkit/latest
   #   setup: pip install .[dev] --no-build-isolation
