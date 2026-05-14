@@ -66,7 +66,7 @@ platforms:
           MODEL_LIST: 9g_8b_thinking_llama
           ENGINE: InfiniLM
           TEST_PARAM: ['default', '--enable-paged-attn --cache-type=paged', '--enable-paged-attn --cache-type=paged --enable-graph']
-
+  
   # iluvatar:
   #   image:
   #     dockerfile: images/iluvatar/
