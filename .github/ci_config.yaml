@@ -34,7 +34,7 @@ platforms:
           timeout: 3600
         stages:
           - name: test
-            run: python scripts/jiuge.py --nvidia /data-aisoft/mechdancer/models/9g_8b_thinking_llama/
+            run: python InfiniLM/scripts/jiuge.py --nvidia /data-aisoft/mechdancer/models/9g_8b_thinking_llama/
       gpu_benchtest:
         type: benchtest
         resources:
@@ -45,7 +45,7 @@ platforms:
           TEST_PARAM: ['default', '--enable-paged-attn', '--enable-paged-attn --enable-graph', '--enable-paged-attn --enable-graph --attn=flash-attn']
         stages:
           - name: test
-            run: python examples/bench.py --device nvidia --model=/data-aisoft/mechdancer/models/9g_8b_thinking_llama/ --input-len=256,1024 --output-len=256,1024 --batch-size=8 <TEST_PARAM>
+            run: python InfiniLM/examples/bench.py --device nvidia --model=/data-aisoft/mechdancer/models/9g_8b_thinking_llama/ --input-len=256,1024 --output-len=256,1024 --batch-size=8 <TEST_PARAM>
       gpu_accuracytest:
         type: accuracytest
         resources:
@@ -56,7 +56,7 @@ platforms:
           TEST_PARAM: ['default', '--enable-paged-attn --enable-graph']
         stages:
           - name: test
-            run: python test/bench/test_benchmark.py --device nvidia --model /data-aisoft/mechdancer/models/9g_8b_thinking_llama/ --bench mmlu --backend cpp --max-new-tokens 5 --cache-dir /data-aisoft/pepe/datasets/ --split=val <TEST_PARAM>
+            run: python InfiniLM/test/bench/test_benchmark.py --device nvidia --model /data-aisoft/mechdancer/models/9g_8b_thinking_llama/ --bench mmlu --backend cpp --max-new-tokens 5 --cache-dir /data-aisoft/pepe/datasets/ --split=val <TEST_PARAM>
       gpu_servicetest:
         type: servicetest
         resources:
@@ -67,7 +67,7 @@ platforms:
           TEST_PARAM: ['default', '--enable-paged-attn --cache-type=paged', '--enable-paged-attn --cache-type=paged --enable-graph']
         stages:
           - name: test
-            run: python scripts.test_perf.py --verbose
+            run: python InfiniLM/scripts/test_perf.py --verbose
 
   # iluvatar:
   #   image:
