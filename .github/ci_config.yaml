@@ -66,6 +66,9 @@ platforms:
           MODEL_LIST: 9g_8b_thinking_llama
           ENGINE: InfiniLM
           TEST_PARAM: ['default', '--enable-paged-attn --cache-type=paged', '--enable-paged-attn --cache-type=paged --enable-graph']
+        stages:
+          - name: test
+            run: python scripts.test_perf.py --verbose
 
   # iluvatar:
   #   image:
