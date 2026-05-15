@@ -29,7 +29,7 @@ PROMPTS = [
 
 NUM_REQUESTS = 64
 CONCURRENCY = 20
-MODEL = "FM9G-7B"
+MODEL = "9g_8b_thinking_llama"
 
 
 async def benchmark_user(client, semaphore, queue, results, user_id, verbose):
