@@ -174,7 +174,7 @@ async def run_benchmark(server_port, verbose=False):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("--port", action="server port number")
+    parser.add_argument("--port", type=int, default=8000)
     parser.add_argument("--verbose", action="store_true")
     args = parser.parse_args()
 
