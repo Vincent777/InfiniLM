@@ -35,7 +35,7 @@ platforms:
           TEST_PARAM: ['--enable-paged-attn --enable-graph --attn=flash-attn']
         stages:
           - name: test
-            run: cd InfiniLM && python examples/bench.py --device nvidia --model=/data-aisoft/mechdancer/models/9g_8b_thinking_llama/ --input-len=256,1024 --output-len=256,1024 --batch-size=8 <TEST_PARAM>
+            run: python examples/bench.py --device nvidia --model=/data-aisoft/mechdancer/models/9g_8b_thinking_llama/ --input-len=256,1024 --output-len=256,1024 --batch-size=8 <TEST_PARAM>
 
   # iluvatar:
   #   image:
