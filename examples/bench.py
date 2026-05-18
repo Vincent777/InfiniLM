@@ -146,7 +146,7 @@ def get_test_cases(
     return case_dict
 
 
-with open("examples/bench_prompt.md", "r") as f:
+with open("InfiniLM/examples/bench_prompt.md", "r") as f:
     prompt = f.read()
 
 
