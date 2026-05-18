@@ -25,6 +25,16 @@ platforms:
       - /data-aisoft/artifacts/CI_nvidia_test/__WORKSPACE__:/artifacts
     setup: pip install .[dev] --no-build-isolation
     jobs:
+      gpu_inferencetest:
+        type: inferencetest
+        resources:
+          ngpus: [1, 4]
+          gpu_style: nvidia
+          shm_size: 64g
+          timeout: 3600
+        stages:
+          - name: test
+            run: python InfiniLM/scripts/jiuge.py --nvidia /data-aisoft/mechdancer/models/9g_8b_thinking_llama/
       gpu_benchtest:
         type: benchtest
         resources:
@@ -35,8 +45,30 @@ platforms:
           TEST_PARAM: ['--enable-paged-attn --enable-graph --attn=flash-attn']
         stages:
           - name: test
-            run: python examples/bench.py --device nvidia --model=/data-aisoft/mechdancer/models/9g_8b_thinking_llama/ --input-len=256,1024 --output-len=256,1024 --batch-size=8 <TEST_PARAM>
-
+            run: cd InfiniLM && python examples/bench.py --device nvidia --model=/data-aisoft/mechdancer/models/9g_8b_thinking_llama/ --input-len=256,1024 --output-len=256,1024 --batch-size=8 <TEST_PARAM>
+      gpu_accuracytest:
+        type: accuracytest
+        resources:
+          gpu_style: nvidia
+          shm_size: 64g
+          timeout: 3600
+        env:
+          TEST_PARAM: ['default', '--enable-paged-attn --enable-graph']
+        stages:
+          - name: test
+            run: python InfiniLM/test/bench/test_benchmark.py --device nvidia --model /data-aisoft/mechdancer/models/9g_8b_thinking_llama/ --bench mmlu --backend cpp --max-new-tokens 5 --cache-dir /data-aisoft/pepe/datasets/ --split=val <TEST_PARAM>
+      gpu_servicetest:
+        type: servicetest
+        resources:
+          shm_size: 64g
+        env:
+          MODEL_LIST: 9g_8b_thinking_llama
+          ENGINE: InfiniLM
+          TEST_PARAM: ['default']
+        stages:
+          - name: test
+            run: python InfiniLM/scripts/test_perf.py --verbose
+  
   # iluvatar:
   #   image:
   #     dockerfile: images/iluvatar/
