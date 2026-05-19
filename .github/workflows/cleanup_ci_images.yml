@@ -16,14 +16,31 @@ on:
         required: false
         default: false
         type: boolean
+      platform:
+        description: Platform to clean
+        required: false
+        default: all
+        type: choice
+        options:
+          - all
+          - nvidia
+          - metax
+          - moore
+          - cambricon
+          - iluvatar
+          - ascend
 
 jobs:
   cleanup:
-    name: Remove stale CI images
+    name: cleanup (${{ matrix.platform }})
+    strategy:
+      fail-fast: false
+      matrix:
+        platform: ${{ fromJSON((github.event_name == 'workflow_dispatch' && github.event.inputs.platform != 'all') && format('["{0}"]', github.event.inputs.platform) || '["nvidia","metax","moore","cambricon","iluvatar","ascend"]') }}
     runs-on:
       - self-hosted
       - linux
-      - nvidia
+      - ${{ matrix.platform }}
       - InfiniLM
     timeout-minutes: 60
     steps:
@@ -35,7 +52,7 @@ jobs:
           RETENTION_DAYS: ${{ github.event.inputs.retention_days || '10' }}
           DRY_RUN: ${{ github.event.inputs.dry_run || 'false' }}
         run: |
-          args=(--days "${RETENTION_DAYS}")
+          args=(--platform "${{ matrix.platform }}" --days "${RETENTION_DAYS}")
           if [[ "${DRY_RUN}" == "true" ]]; then
             args+=(--dry-run)
           fi

@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
 # Delete local CI Docker images older than RETENTION_DAYS.
-# Targets: infinilm-ci/nvidia, infiniops-ci/nvidia
+# Targets: infinilm-ci/<platform>, infiniops-ci/<platform>
 #
 # Usage:
-#   ./scripts/cleanup_ci_images.sh              # delete images older than 10 days
-#   ./scripts/cleanup_ci_images.sh --dry-run    # preview only
-#   ./scripts/cleanup_ci_images.sh --days 14    # custom retention
+#   ./scripts/cleanup_ci_images.sh --platform nvidia
+#   ./scripts/cleanup_ci_images.sh --platform metax --dry-run
+#   ./scripts/cleanup_ci_images.sh --platform nvidia --days 14
 #
 # Scheduled via GitHub Actions: .github/workflows/cleanup_ci_images.yml
 # Manual run: Actions -> "Cleanup CI Docker Images" -> "Run workflow"
@@ -14,21 +14,19 @@ set -euo pipefail
 
 RETENTION_DAYS=10
 DRY_RUN=false
-IMAGE_PREFIXES=(
-  "infinilm-ci/nvidia"
-  # "infiniops-ci/nvidia"
-)
+PLATFORM=""
 
 usage() {
   cat <<'EOF'
-Usage: cleanup_ci_images.sh [OPTIONS]
+Usage: cleanup_ci_images.sh --platform PLATFORM [OPTIONS]
 
 Remove local CI Docker images older than the retention period.
 
 Options:
-  --days N     Retention in days (default: 10)
-  --dry-run    List images that would be deleted without removing them
-  -h, --help   Show this help message
+  --platform P  Platform name, e.g. nvidia, metax, moore, cambricon, iluvatar, ascend (required)
+  --days N      Retention in days (default: 10)
+  --dry-run     List images that would be deleted without removing them
+  -h, --help    Show this help message
 EOF
 }
 
@@ -38,6 +36,10 @@ log() {
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
+    --platform)
+      PLATFORM="${2:?--platform requires a name}"
+      shift 2
+      ;;
     --days)
       RETENTION_DAYS="${2:?--days requires a number}"
       shift 2
@@ -57,6 +59,22 @@ while [[ $# -gt 0 ]]; do
       ;;
   esac
 done
+
+if [[ -z "${PLATFORM}" ]]; then
+  echo "Error: --platform is required (e.g. nvidia, metax)" >&2
+  usage >&2
+  exit 1
+fi
+
+if ! [[ "${PLATFORM}" =~ ^[a-z0-9_-]+$ ]]; then
+  echo "Error: invalid platform name: ${PLATFORM}" >&2
+  exit 1
+fi
+
+IMAGE_PREFIXES=(
+  "infinilm-ci/${PLATFORM}"
+  # "infiniops-ci/${PLATFORM}"
+)
 
 if ! [[ "$RETENTION_DAYS" =~ ^[0-9]+$ ]] || [[ "$RETENTION_DAYS" -lt 1 ]]; then
   echo "Error: --days must be a positive integer" >&2
@@ -80,7 +98,7 @@ deleted=0
 failed=0
 kept=0
 
-log "Retention: ${RETENTION_DAYS} day(s); delete images created before ${CUTOFF_HUMAN}"
+log "Platform: ${PLATFORM}; retention: ${RETENTION_DAYS} day(s); delete images created before ${CUTOFF_HUMAN}"
 if $DRY_RUN; then
   log "Dry-run mode: no images will be removed"
 fi
