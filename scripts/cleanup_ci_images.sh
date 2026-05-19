@@ -1,0 +1,127 @@
+#!/usr/bin/env bash
+# Delete local CI Docker images older than RETENTION_DAYS.
+# Targets: infinilm-ci/nvidia, infiniops-ci/nvidia
+#
+# Usage:
+#   ./scripts/cleanup_ci_images.sh              # delete images older than 10 days
+#   ./scripts/cleanup_ci_images.sh --dry-run    # preview only
+#   ./scripts/cleanup_ci_images.sh --days 14    # custom retention
+#
+# Scheduled via GitHub Actions: .github/workflows/cleanup_ci_images.yml
+# Manual run: Actions -> "Cleanup CI Docker Images" -> "Run workflow"
+
+set -euo pipefail
+
+RETENTION_DAYS=10
+DRY_RUN=false
+IMAGE_PREFIXES=(
+  "infinilm-ci/nvidia"
+  # "infiniops-ci/nvidia"
+)
+
+usage() {
+  cat <<'EOF'
+Usage: cleanup_ci_images.sh [OPTIONS]
+
+Remove local CI Docker images older than the retention period.
+
+Options:
+  --days N     Retention in days (default: 10)
+  --dry-run    List images that would be deleted without removing them
+  -h, --help   Show this help message
+EOF
+}
+
+log() {
+  printf '[%s] %s\n' "$(date -u '+%Y-%m-%d %H:%M:%S UTC')" "$*"
+}
+
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    --days)
+      RETENTION_DAYS="${2:?--days requires a number}"
+      shift 2
+      ;;
+    --dry-run)
+      DRY_RUN=true
+      shift
+      ;;
+    -h | --help)
+      usage
+      exit 0
+      ;;
+    *)
+      echo "Unknown option: $1" >&2
+      usage >&2
+      exit 1
+      ;;
+  esac
+done
+
+if ! [[ "$RETENTION_DAYS" =~ ^[0-9]+$ ]] || [[ "$RETENTION_DAYS" -lt 1 ]]; then
+  echo "Error: --days must be a positive integer" >&2
+  exit 1
+fi
+
+if ! command -v docker >/dev/null 2>&1; then
+  echo "Error: docker not found in PATH" >&2
+  exit 1
+fi
+
+if ! docker info >/dev/null 2>&1; then
+  echo "Error: cannot connect to Docker daemon" >&2
+  exit 1
+fi
+
+CUTOFF_EPOCH=$(date -d "${RETENTION_DAYS} days ago" +%s)
+CUTOFF_HUMAN=$(date -u -d "@${CUTOFF_EPOCH}" '+%Y-%m-%d %H:%M:%S UTC')
+
+deleted=0
+failed=0
+kept=0
+
+log "Retention: ${RETENTION_DAYS} day(s); delete images created before ${CUTOFF_HUMAN}"
+if $DRY_RUN; then
+  log "Dry-run mode: no images will be removed"
+fi
+
+for prefix in "${IMAGE_PREFIXES[@]}"; do
+  log "Scanning ${prefix}:*"
+
+  while IFS=$'\t' read -r image_id repository tag created_at; do
+    [[ -z "${image_id}" ]] && continue
+    [[ "${tag}" == "<none>" ]] && continue
+
+    created_epoch=$(date -d "${created_at% UTC}" +%s 2>/dev/null) || {
+      log "WARN: skip ${repository}:${tag} (cannot parse created time: ${created_at})"
+      ((failed++)) || true
+      continue
+    }
+
+    if ((created_epoch >= CUTOFF_EPOCH)); then
+      ((kept++)) || true
+      continue
+    fi
+
+    ref="${repository}:${tag}"
+    if $DRY_RUN; then
+      log "WOULD DELETE ${ref} (created ${created_at})"
+      ((deleted++)) || true
+      continue
+    fi
+
+    if docker rmi "${ref}" >/dev/null 2>&1; then
+      log "Deleted ${ref} (created ${created_at})"
+      ((deleted++)) || true
+    else
+      log "WARN: failed to delete ${ref} (image may be in use)"
+      ((failed++)) || true
+    fi
+  done < <(
+    docker images \
+      --format '{{.ID}}\t{{.Repository}}\t{{.Tag}}\t{{.CreatedAt}}' \
+      --filter "reference=${prefix}"
+  )
+done
+
+log "Done. removed=${deleted} kept=${kept} failed=${failed}"
