@@ -2,14 +2,14 @@ name: Cleanup CI Docker Images
 
 on:
   schedule:
-    # Daily at 03:00 UTC (replaces machine crontab)
-    - cron: "0 3 * * *"
+    # Daily at 03:00 Beijing time (UTC+8) = 19:00 UTC previous calendar day
+    - cron: "0 19 * * *"
   workflow_dispatch:
     inputs:
       retention_days:
         description: Retention in days
         required: false
-        default: "10"
+        default: "3"
         type: string
       dry_run:
         description: Dry run only (list without deleting)
