@@ -1,0 +1,42 @@
+name: Cleanup CI Docker Images
+
+on:
+  schedule:
+    # Daily at 03:00 UTC (replaces machine crontab)
+    - cron: "0 3 * * *"
+  workflow_dispatch:
+    inputs:
+      retention_days:
+        description: Retention in days
+        required: false
+        default: "10"
+        type: string
+      dry_run:
+        description: Dry run only (list without deleting)
+        required: false
+        default: false
+        type: boolean
+
+jobs:
+  cleanup:
+    name: Remove stale CI images
+    runs-on:
+      - self-hosted
+      - linux
+      - nvidia
+      - InfiniLM
+    timeout-minutes: 60
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Cleanup old CI Docker images
+        env:
+          RETENTION_DAYS: ${{ github.event.inputs.retention_days || '10' }}
+          DRY_RUN: ${{ github.event.inputs.dry_run || 'false' }}
+        run: |
+          args=(--days "${RETENTION_DAYS}")
+          if [[ "${DRY_RUN}" == "true" ]]; then
+            args+=(--dry-run)
+          fi
+          bash scripts/cleanup_ci_images.sh "${args[@]}"
