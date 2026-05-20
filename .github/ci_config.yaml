@@ -82,17 +82,19 @@ platforms:
       - "--ulimit=stack=67108864"
     setup: pip install .[dev] --no-build-isolation
     jobs:
-      gpu:
-        type: unittest
+      gpu_inferencetest:
+        type: inferencetest
         resources:
-          ngpus: 1
-          gpu_style: none                  # MetaX: passthrough via --privileged, CUDA_VISIBLE_DEVICES controls visibility
-          memory: 32GB
-          shm_size: 16g
+          ngpus: [1, 1, 2]
+          gpu_style: nvidia
+          shm_size: 64g
           timeout: 3600
+        env:
+          MODEL_LIST: 9g_8b_thinking_llama
+          TEST_PARAM: ['--attn=default', '--attn=flash-attn --enable-graph --enable-paged-attn --cache-type=paged --block-size=256 --max-new-tokens=256', '--attn=flash-attn --enable-graph --enable-paged-attn --cache-type=paged --block-size=256 --max-new-tokens=256']
         stages:
           - name: test
-            run: pytest tests/ -n 4 -v --tb=short --junitxml=/workspace/results/test-results.xml
+            run: python -u "InfiniLM/examples/jiuge.py" --device metax --backend cpp --prompt "Hello" <TEST_PARAM>
 
   # moore:
   #   image:
