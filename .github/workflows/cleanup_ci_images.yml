@@ -49,7 +49,7 @@ jobs:
 
       - name: Cleanup old CI Docker images
         env:
-          RETENTION_DAYS: ${{ github.event.inputs.retention_days || '10' }}
+          RETENTION_DAYS: ${{ github.event.inputs.retention_days || '3' }}
           DRY_RUN: ${{ github.event.inputs.dry_run || 'false' }}
         run: |
           args=(--platform "${{ matrix.platform }}" --days "${RETENTION_DAYS}")
