@@ -95,7 +95,7 @@ platforms:
         stages:
           - name: test
             run: python -u "InfiniLM/examples/jiuge.py" --device metax --backend cpp --prompt "Hello" <TEST_PARAM>
-  
+
   # moore:
   #   image:
   #     dockerfile: images/moore/
