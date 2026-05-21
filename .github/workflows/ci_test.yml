@@ -1,0 +1,15 @@
+name: CI
+
+on:
+  push:
+    branches: ["issue/224"]
+  pull_request:
+    branches: ["issue/224"]
+
+jobs:
+  ci:
+    uses: InfiniTensor/ci/.github/workflows/infinilm-ci.yml@infiniCore_ci
+    with:
+      config_path: .github/ci_config.yaml
+      ci_ref: infiniCore_ci
+    secrets: inherit
