@@ -96,28 +96,28 @@ platforms:
           - name: test
             run: python -u "InfiniLM/examples/test_infer.py" --device metax --backend cpp --prompt "Hello" <TEST_PARAM>
 
-  # moore:
-  #   image:
-  #     dockerfile: images/moore/
-  #     build_args:
-  #       BASE_IMAGE: sh-harbor.mthreads.com/mcctest/vllm_musa:20251112_hygon
-  #       APT_MIRROR: http://archive.ubuntu.com/ubuntu
-  #       PIP_INDEX_URL: https://pypi.org/simple
-  #   docker_args:
-  #     - "--privileged"
-  #   setup: pip install .[dev] --no-build-isolation
-  #   jobs:
-  #     gpu:
-  #       type: unittest
-  #       resources:
-  #         ngpus: 1
-  #         gpu_style: none                  # Moore: passthrough via --privileged, MTHREADS_VISIBLE_DEVICES controls visibility
-  #         memory: 32GB
-  #         shm_size: 16g
-  #         timeout: 3600
-  #       stages:
-  #         - name: test
-  #           run: pytest tests/test_add.py tests/test_gemm.py tests/test_swiglu.py -n 4 -v --tb=short --junitxml=/workspace/results/test-results.xml
+  moore:
+    image:
+      dockerfile: images/moore/
+      build_args:
+        BASE_IMAGE: sh-harbor.mthreads.com/mcctest/vllm_musa:20251112_hygon
+        APT_MIRROR: http://archive.ubuntu.com/ubuntu
+        PIP_INDEX_URL: https://pypi.org/simple
+    docker_args:
+      - "--privileged"
+    setup: pip install .[dev] --no-build-isolation
+    jobs:
+      gpu:
+        type: unittest
+        resources:
+          ngpus: 1
+          gpu_style: none                  # Moore: passthrough via --privileged, MTHREADS_VISIBLE_DEVICES controls visibility
+          memory: 32GB
+          shm_size: 16g
+          timeout: 3600
+        stages:
+          - name: test
+            run: pytest tests/test_add.py tests/test_gemm.py tests/test_swiglu.py -n 4 -v --tb=short --junitxml=/workspace/results/test-results.xml
 
   # cambricon:
   #   image:
