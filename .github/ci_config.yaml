@@ -104,7 +104,17 @@ platforms:
         APT_MIRROR: http://archive.ubuntu.com/ubuntu
         PIP_INDEX_URL: https://pypi.org/simple
     docker_args:
+      - "--user=root"
+      - "--network=host"
       - "--privileged"
+      - "--cap-add=ALL"
+      - "--pid=host"
+      - "--ipc=host"
+      - "--workdir=/workspace"
+    volumes:
+      - /data:/data
+      - /data-aisoft:/data-aisoft
+      - /data-aisoft/artifacts/CI_nvidia_test/__WORKSPACE__:/artifacts
     setup: pip install .[dev] --no-build-isolation
     jobs:
       gpu_inferencetest:
