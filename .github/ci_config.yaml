@@ -134,6 +134,7 @@ platforms:
       dockerfile: images/cambricon/
       build_args:
         BASE_IMAGE: cambricon/pytorch:v1.25.3-torch2.1-anolisos8.8-py310
+        APT_MIRROR: http://archive.ubuntu.com/ubuntu
         PIP_INDEX_URL: https://pypi.org/simple
     docker_args:
       - "--user=root"
