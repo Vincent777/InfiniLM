@@ -69,61 +69,49 @@ platforms:
   #         - name: test
   #           run: python InfiniLM/scripts/test_perf.py --verbose
 
-  metax:
-    image:
-      dockerfile: images/metax/
-      build_args:
-        BASE_IMAGE: cr.metax-tech.com/public-ai-release/maca/vllm-metax:0.10.2-maca.ai3.2.1.7-torch2.6-py310-ubuntu22.04-amd64
-        APT_MIRROR: http://archive.ubuntu.com/ubuntu
-        PIP_INDEX_URL: https://pypi.org/simple
-    docker_args:
-      - "--privileged"
-      - "--ulimit=memlock=-1"
-      - "--ulimit=stack=67108864"
-    setup: pip install .[dev] --no-build-isolation
-    jobs:
-      gpu_inferencetest:
-        type: inferencetest
-        resources:
-          ngpus: [1, 1, 2]
-          gpu_style: nvidia
-          shm_size: 64g
-          timeout: 3600
-        env:
-          MODEL_LIST: 9g_8b_thinking_llama
-          TEST_PARAM: ['--attn=default', '--attn=flash-attn --enable-graph --enable-paged-attn --cache-type=paged --block-size=256 --max-new-tokens=256', '--attn=flash-attn --enable-graph --enable-paged-attn --cache-type=paged --block-size=256 --max-new-tokens=256']
-        stages:
-          - name: test
-            run: python -u "InfiniLM/examples/test_infer.py" --device metax --backend cpp --prompt "Hello" <TEST_PARAM>
-
-  moore:
-    image:
-      dockerfile: images/moore/
-      build_args:
-        BASE_IMAGE: sh-harbor.mthreads.com/mcctest/vllm_musa:20251112_hygon
-        APT_MIRROR: http://archive.ubuntu.com/ubuntu
-        PIP_INDEX_URL: https://pypi.org/simple
-    docker_args:
-      - "--privileged"
-    setup: pip install .[dev] --no-build-isolation
-    jobs:
-      gpu:
-        type: unittest
-        resources:
-          ngpus: 1
-          gpu_style: none                  # Moore: passthrough via --privileged, MTHREADS_VISIBLE_DEVICES controls visibility
-          memory: 32GB
-          shm_size: 16g
-          timeout: 3600
-        stages:
-          - name: test
-            run: pytest tests/test_add.py tests/test_gemm.py tests/test_swiglu.py -n 4 -v --tb=short --junitxml=/workspace/results/test-results.xml
-
-  # cambricon:
+  # metax:
   #   image:
-  #     dockerfile: images/cambricon/
+  #     dockerfile: images/metax/
   #     build_args:
-  #       BASE_IMAGE: cambricon/pytorch:v1.25.3-torch2.1-anolisos8.8-py310
+  #       BASE_IMAGE: cr.metax-tech.com/public-ai-release/maca/vllm-metax:0.10.2-maca.ai3.2.1.7-torch2.6-py310-ubuntu22.04-amd64
+  #       APT_MIRROR: http://archive.ubuntu.com/ubuntu
+  #       PIP_INDEX_URL: https://pypi.org/simple
+  #   docker_args:
+  #     - "--user=root"
+  #     - "--network=host"
+  #     - "--privileged"
+  #     - "--cap-add=ALL"
+  #     - "--pid=host"
+  #     - "--ipc=host"
+  #     - "--workdir=/workspace"
+  #     - "--ulimit=memlock=-1"
+  #     - "--ulimit=stack=67108864"
+  #   volumes:
+  #     - /data:/data
+  #     - /data-aisoft:/data-aisoft
+  #     - /data-aisoft/artifacts/CI_metax_test/__WORKSPACE__:/artifacts
+  #   setup: pip install .[dev] --no-build-isolation
+  #   jobs:
+  #     gpu_inferencetest:
+  #       type: inferencetest
+  #       resources:
+  #         ngpus: [1, 1, 2]
+  #         gpu_style: nvidia
+  #         shm_size: 64g
+  #         timeout: 3600
+  #       env:
+  #         MODEL_LIST: 9g_8b_thinking_llama
+  #         TEST_PARAM: ['--attn=default', '--attn=flash-attn --enable-graph --enable-paged-attn --cache-type=paged --block-size=256 --max-new-tokens=256', '--attn=flash-attn --enable-graph --enable-paged-attn --cache-type=paged --block-size=256 --max-new-tokens=256']
+  #       stages:
+  #         - name: test
+  #           run: python -u "InfiniLM/examples/test_infer.py" --device metax --backend cpp --prompt "Hello" <TEST_PARAM>
+
+  # moore:
+  #   image:
+  #     dockerfile: images/moore/
+  #     build_args:
+  #       BASE_IMAGE: sh-harbor.mthreads.com/mcctest/vllm_musa:20251112_hygon
+  #       APT_MIRROR: http://archive.ubuntu.com/ubuntu
   #       PIP_INDEX_URL: https://pypi.org/simple
   #   docker_args:
   #     - "--privileged"
@@ -133,13 +121,79 @@ platforms:
   #       type: unittest
   #       resources:
   #         ngpus: 1
-  #         gpu_style: mlu                   # Cambricon: passthrough via --privileged, MLU_VISIBLE_DEVICES for device control
+  #         gpu_style: none                  # Moore: passthrough via --privileged, MTHREADS_VISIBLE_DEVICES controls visibility
   #         memory: 32GB
   #         shm_size: 16g
   #         timeout: 3600
   #       stages:
   #         - name: test
-  #           run: pytest tests/test_gemm.py -n 4 -v --tb=short --junitxml=/workspace/results/test-results.xml
+  #           run: pytest tests/test_add.py tests/test_gemm.py tests/test_swiglu.py -n 4 -v --tb=short --junitxml=/workspace/results/test-results.xml
+
+  cambricon:
+    image:
+      dockerfile: images/cambricon/
+      build_args:
+        BASE_IMAGE: cambricon/pytorch:v1.25.3-torch2.1-anolisos8.8-py310
+        PIP_INDEX_URL: https://pypi.org/simple
+    docker_args:
+      - "--user=root"
+      - "--network=host"
+      - "--privileged"
+      - "--cap-add=ALL"
+      - "--pid=host"
+      - "--ipc=host"
+      - "--workdir=/workspace"
+    volumes:
+      - /data:/data
+      - /data-aisoft:/data-aisoft
+      - /data-aisoft/artifacts/CI_cambricon_test/__WORKSPACE__:/artifacts
+    setup: pip install .[dev] --no-build-isolation
+    jobs:
+      gpu_inferencetest:
+          type: inferencetest
+          resources:
+            ngpus: [1, 4]
+            gpu_style: mlu
+            shm_size: 64g
+            timeout: 3600
+          stages:
+            - name: test
+              run: python InfiniLM/examples/test_infer.py --device nvidia --model=/data-aisoft/mechdancer/models/9g_8b_thinking_llama/
+      gpu_benchtest:
+        type: benchtest
+        resources:
+          gpu_style: mlu
+          shm_size: 64g
+          timeout: 3600
+        env:
+          TEST_PARAM: ['default', '--enable-paged-attn', '--enable-paged-attn --enable-graph']
+        stages:
+          - name: test
+            run: python InfiniLM/examples/bench.py --device nvidia --model=/data-aisoft/mechdancer/models/9g_8b_thinking_llama/ --input-len=256,1024 --output-len=256,1024 --batch-size=8 <TEST_PARAM>
+      gpu_accuracytest:
+        type: accuracytest
+        resources:
+          gpu_style: mlu
+          shm_size: 64g
+          timeout: 3600
+        env:
+          TEST_PARAM: ['default', '--enable-paged-attn --enable-graph']
+        stages:
+          - name: test
+            run: python InfiniLM/test/bench/test_benchmark.py --device nvidia --model /data-aisoft/mechdancer/models/9g_8b_thinking_llama/ --bench mmlu --backend cpp --max-new-tokens 5 --cache-dir /data-aisoft/pepe/datasets/ --split=val <TEST_PARAM>
+      gpu_servicetest:
+        type: servicetest
+        resources:
+          gpu_style: mlu
+          shm_size: 64g
+          timeout: 3600
+        env:
+          MODEL_LIST: 9g_8b_thinking_llama
+          ENGINE: InfiniLM
+          TEST_PARAM: ['default', '--enable-paged-attn --cache-type=paged', '--enable-paged-attn --cache-type=paged --enable-graph']
+        stages:
+          - name: test
+            run: python InfiniLM/scripts/test_perf.py --verbose
 
   # ascend:
   #   image:
