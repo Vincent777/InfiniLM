@@ -114,7 +114,7 @@ platforms:
     volumes:
       - /data:/data
       - /data-aisoft:/data-aisoft
-      - /data-aisoft/artifacts/CI_nvidia_test/__WORKSPACE__:/artifacts
+      - /data-aisoft/artifacts/CI_moore_test/__WORKSPACE__:/artifacts
     setup: pip install .[dev] --no-build-isolation
     jobs:
       gpu_inferencetest:
@@ -152,7 +152,9 @@ platforms:
       gpu_servicetest:
         type: servicetest
         resources:
+          gpu_style: nvidia
           shm_size: 64g
+          timeout: 3600
         env:
           MODEL_LIST: 9g_8b_thinking_llama
           ENGINE: InfiniLM
