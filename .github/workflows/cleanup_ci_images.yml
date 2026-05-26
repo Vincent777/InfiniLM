@@ -1,0 +1,59 @@
+name: Cleanup CI Docker Images
+
+on:
+  schedule:
+    # Daily at 03:00 Beijing time (UTC+8) = 19:00 UTC previous calendar day
+    - cron: "0 19 * * *"
+  workflow_dispatch:
+    inputs:
+      retention_days:
+        description: Retention in days
+        required: false
+        default: "3"
+        type: string
+      dry_run:
+        description: Dry run only (list without deleting)
+        required: false
+        default: false
+        type: boolean
+      platform:
+        description: Platform to clean
+        required: false
+        default: all
+        type: choice
+        options:
+          - all
+          - nvidia
+          - metax
+          - moore
+          - cambricon
+          - iluvatar
+          - ascend
+
+jobs:
+  cleanup:
+    name: cleanup (${{ matrix.platform }})
+    strategy:
+      fail-fast: false
+      matrix:
+        platform: ${{ fromJSON((github.event_name == 'workflow_dispatch' && github.event.inputs.platform != 'all') && format('["{0}"]', github.event.inputs.platform) || '["nvidia","metax","moore","cambricon","iluvatar","ascend"]') }}
+    runs-on:
+      - self-hosted
+      - linux
+      - ${{ matrix.platform }}
+      - InfiniLM
+    timeout-minutes: 60
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Cleanup old CI Docker images
+        env:
+          RETENTION_DAYS: ${{ github.event.inputs.retention_days || '3' }}
+          DRY_RUN: ${{ github.event.inputs.dry_run || 'false' }}
+        run: |
+          args=(--platform "${{ matrix.platform }}" --days "${RETENTION_DAYS}")
+          if [[ "${DRY_RUN}" == "true" ]]; then
+            args+=(--dry-run)
+          fi
+          bash scripts/cleanup_ci_images.sh "${args[@]}"
