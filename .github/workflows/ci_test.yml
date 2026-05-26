@@ -2,9 +2,9 @@ name: CI
 
 on:
   push:
-    branches: ["main"]
+    branches: ["refactor/inline-infinicore"]
   pull_request:
-    branches: ["main"]
+    branches: ["refactor/inline-infinicore"]
 
 jobs:
   ci:
