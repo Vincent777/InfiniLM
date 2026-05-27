@@ -240,7 +240,7 @@ platforms:
     image:
       dockerfile: images/hygon/
       build_args:
-        BASE_IMAGE: harbor.sourcefind.cn:5443/dcu/admin/base/custom:vllm015-ubuntu22.04-dtk26.04-0409-modelzoo:5e4e1ced6f9d
+        BASE_IMAGE: image.sourcefind.cn:5000/dcu/admin/base/pytorch:2.4.1-ubuntu22.04-dtk25.04.1-py3.10
         APT_MIRROR: https://mirrors.tuna.tsinghua.edu.cn/ubuntu
         PIP_INDEX_URL: https://pypi.org/simple
         InfiniCore_BRANCH: main
