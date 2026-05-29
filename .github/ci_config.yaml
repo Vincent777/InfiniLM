@@ -37,7 +37,7 @@ platforms:
             timeout: 3600
           stages:
             - name: test
-              run: python InfiniLM/examples/test_infer.py --device moore --model=/data-aisoft/mechdancer/models/9g_8b_thinking_llama/
+              run: python InfiniLM/examples/jiuge.py --device moore --model=/data-aisoft/mechdancer/models/9g_8b_thinking_llama/
       gpu_benchtest:
         type: benchtest
         resources:
