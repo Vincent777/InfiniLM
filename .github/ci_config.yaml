@@ -45,7 +45,7 @@ platforms:
           shm_size: 64g
           timeout: 3600
         env:
-          TEST_PARAM: ['batch-size=1', '--enable-paged-attn batch-size=1', '--enable-paged-attn --enable-graph batch-size=8']
+          TEST_PARAM: ['--batch-size=1', '--enable-paged-attn --batch-size=1', '--enable-paged-attn --enable-graph --batch-size=8']
         stages:
           - name: test
             run: python InfiniLM/examples/bench.py --device moore --model=/data-aisoft/mechdancer/models/9g_8b_thinking_llama/ --input-len=256,1024 --output-len=256,1024 <TEST_PARAM>
