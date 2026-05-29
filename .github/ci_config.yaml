@@ -31,7 +31,7 @@ platforms:
       gpu_inferencetest:
           type: inferencetest
           resources:
-            ngpus: [1, 4]
+            ngpus: [1, 2]
             gpu_style: none
             shm_size: 64g
             timeout: 3600
