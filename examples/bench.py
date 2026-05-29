@@ -262,7 +262,7 @@ def get_args():
     return parser.parse_args()
 
 
-with open("examples/bench_prompt.md", "r") as f:
+with open("InfiniLM-issue_224/examples/bench_prompt.md", "r") as f:
     prompt = f.read()
 
 
