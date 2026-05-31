@@ -108,7 +108,7 @@ platforms:
           TEST_PARAM: ['--attn=default', '--attn=flash-attn --enable-graph --enable-paged-attn --cache-type=paged --block-size=256 --max-new-tokens=256', '--attn=flash-attn --enable-graph --enable-paged-attn --cache-type=paged --block-size=256 --max-new-tokens=256']
         stages:
           - name: test
-            run: python -u "InfiniLM/examples/test_infer.py" --device metax --backend cpp --prompt "Hello" <TEST_PARAM>
+            run: python -u "InfiniLM/examples/test_infer.py" --device metax --model=/data-aisoft/mechdancer/models/9g_8b_thinking_llama/ --backend cpp --prompt "Hello" <TEST_PARAM>
 
   # moore:
   #   image:
