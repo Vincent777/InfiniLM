@@ -249,10 +249,17 @@ platforms:
       - "--pid=host"
       - "--ipc=host"
       - "--workdir=/workspace"
+      - "--device=/dev/kfd"
+      - "--device=/dev/mkfd"
+      - "--device=/dev/dri"
+      - "--security-opt"
+      - "seccomp=unconfined"
+      - "--group-add=video"
     volumes:
       - /data:/data
       - /data-aisoft:/data-aisoft
       - /data-aisoft/artifacts/CI_hygon_test/__WORKSPACE__:/artifacts
+      - /opt/hyhal:/opt/hyhal
     setup: pip install .[dev] --no-build-isolation
     jobs:
       gpu_inferencetest:
