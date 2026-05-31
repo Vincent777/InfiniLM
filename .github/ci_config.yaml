@@ -73,3 +73,4 @@ platforms:
         stages:
           - name: test
             run: python InfiniLM/scripts/test_perf.py --verbose
+  
