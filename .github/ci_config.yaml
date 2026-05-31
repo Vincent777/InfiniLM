@@ -255,6 +255,7 @@ platforms:
       - "--security-opt"
       - "seccomp=unconfined"
       - "--group-add=video"
+      - "--group-add=render"
     volumes:
       - /data:/data
       - /data-aisoft:/data-aisoft
