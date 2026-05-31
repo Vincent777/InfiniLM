@@ -109,7 +109,7 @@ platforms:
         stages:
           - name: test
             run: python -u "InfiniLM/examples/test_infer.py" --device metax --backend cpp --prompt "Hello" <TEST_PARAM>
-  
+
   # moore:
   #   image:
   #     dockerfile: images/moore/
