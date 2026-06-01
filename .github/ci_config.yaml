@@ -37,7 +37,7 @@ platforms:
             timeout: 3600
           stages:
             - name: test
-              run: python InfiniLM/examples/jiuge.py --moore --model=/data-aisoft/mechdancer/models/9g_8b_thinking_llama/
+              run: python InfiniLM/examples/jiuge.py --moore --model=/data-aisoft/mechdancer/models/9g_8b_thinking/
       gpu_benchtest:
         type: benchtest
         resources:
@@ -48,7 +48,7 @@ platforms:
           TEST_PARAM: ['--batch-size=1', '--enable-paged-attn --batch-size=1', '--enable-paged-attn --enable-graph --batch-size=8']
         stages:
           - name: test
-            run: python InfiniLM/examples/bench.py --moore --model=/data-aisoft/mechdancer/models/9g_8b_thinking_llama/ --input-len=256,1024 --output-len=256,1024 <TEST_PARAM>
+            run: python InfiniLM/examples/bench.py --moore --model=/data-aisoft/mechdancer/models/9g_8b_thinking/ --input-len=256,1024 --output-len=256,1024 <TEST_PARAM>
       gpu_accuracytest:
         type: accuracytest
         resources:
@@ -59,7 +59,7 @@ platforms:
           TEST_PARAM: ['--bench ceval', '--bench mmlu']
         stages:
           - name: test
-            run: python InfiniLM/test/bench/test_benchmark.py --moore /data-aisoft/zhushuang/models/9g_8b_thinking_llama/ --subject all --backend cpp --ndev 1 --output_csv 8b_mmlu_paged_results.csv --split val --cache_dir /data-aisoft/pepe/datasets/ <TEST_PARAM>
+            run: python InfiniLM/test/bench/test_benchmark.py --moore /data-aisoft/zhushuang/models/9g_8b_thinking/ --subject all --backend cpp --ndev 1 --output_csv 8b_mmlu_paged_results.csv --split val --cache_dir /data-aisoft/pepe/datasets/ <TEST_PARAM>
       gpu_servicetest:
         type: servicetest
         resources:
@@ -67,7 +67,7 @@ platforms:
           shm_size: 64g
           timeout: 3600
         env:
-          MODEL_LIST: 9g_8b_thinking_llama
+          MODEL_LIST: 9g_8b_thinking
           ENGINE: InfiniLM
           TEST_PARAM: ['--cache_type=static', '--cache_type=paged --num_blocks=512 --block_size=64', '--cache_type=paged --enable-graph --num_blocks=512 --block_size=64']
         stages:
