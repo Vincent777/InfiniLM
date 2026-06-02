@@ -1,12 +1,12 @@
 <!--
-Thanks for contributing to InfiniOps! Please read `CONTRIBUTING.md` before
+Thanks for contributing to InfiniLM! Please read `CONTRIBUTING.md` before
 opening a pull request and fill out every section below. Delete any section
 that is genuinely not applicable (and note why), but do not delete the
 "Checklist" section — it must be filled in for every PR.
 
 The PR title MUST follow Conventional Commits, e.g.
-  feat: add fused RMSNorm kernel
-  fix: correct stride handling for batched matmul
+  feat: support Llama 3 models
+  fix: correct linear attention calculations
 See: https://www.conventionalcommits.org/
 -->
 
@@ -14,7 +14,7 @@ See: https://www.conventionalcommits.org/
 
 <!--
 A concise description of **what** this PR changes. Prefer bullet points over
-prose. Reference files with backtick-fenced paths (e.g. `src/cuda/gemm/blas.h`).
+prose. Reference files with backtick-fenced paths (e.g. `csrc/models/llama/*`).
 -->
 
 -
@@ -32,10 +32,9 @@ Closes #
 
 ## Type of Change
 
-<!-- Tick one or more. The type MUST match the Conventional Commits prefix
-in the PR title and the branch name (see `CONTRIBUTING.md` §Branches). -->
+<!-- Tick one or more. -->
 
-- [ ] `feat` — new feature / new operator / new platform
+- [ ] `feat` — new feature / new model
 - [ ] `fix` — bug fix
 - [ ] `perf` — performance improvement (no behavioral change)
 - [ ] `refactor` — code restructuring without behavior change
@@ -43,53 +42,25 @@ in the PR title and the branch name (see `CONTRIBUTING.md` §Branches). -->
 - [ ] `docs` — documentation only
 - [ ] `build` / `ci` — build system or CI configuration
 - [ ] `chore` — tooling, formatting, or other non-code changes
-- [ ] Breaking change (requires a `!` in the Conventional Commits prefix or a `BREAKING CHANGE:` footer)
+- [ ] Breaking change
 
-## Platforms Affected
-
-<!-- Tick every backend whose code is touched **or** whose behavior may change. -->
-
-- [ ] CPU (`WITH_CPU`)
-- [ ] NVIDIA (`WITH_NVIDIA`)
-- [ ] Iluvatar (`WITH_ILUVATAR`)
-- [ ] MetaX (`WITH_METAX`)
-- [ ] Cambricon (`WITH_CAMBRICON`)
-- [ ] Moore (`WITH_MOORE`)
-- [ ] Ascend (`WITH_ASCEND`)
-- [ ] PyTorch C++ bindings (`WITH_TORCH`)
-- [ ] Build system / CMake / CI
-- [ ] Python bindings / user-facing API
-
-## Test Results on Supported Platforms
+## Test Results of Involved Models on Supported Platforms (Please attach screenshots)
 
 <!--
-Per `CONTRIBUTING.md` §Pull Requests, you MUST build and test on every
-supported platform touched by this PR (or explain why a platform is not
-reachable). Paste `pytest` output summaries below (a trimmed tail is fine —
-include pass/fail counts, skipped tests, and any warnings).
+For now, provide the screenshots for involved tests performed on platforms supposed to support the changes.
 
-If a platform was **not** tested, state the reason (e.g. "no hardware
-available"). Reviewers may block the PR until coverage is provided or an
-explicit owner signs off on a partial run.
+Tests that might be involved:
+Single request test: examples/test_infer.py
+Offline performance: examples/bench.py
+Sanity test: test/bench/test_benchmark.py
+Service: python/infinilm/server/inference_server.py + scripts/test_perf.py
+
+Model adaptations may involve all four tests, unless specifying partial support for vastly new structures and confirmed with admin.
+
+Python-level changes may involve less tests depending on which files/features are modified. 
+
+Framework-level and Python-level changes may affect different models. Test a few models that might be affected.
 -->
-
-| Platform   | Built | `pytest` Result | Notes / Hardware |
-| ---------- | :---: | --------------- | ---------------- |
-| NVIDIA     |       |                 |                  |
-| Iluvatar   |       |                 |                  |
-| MetaX      |       |                 |                  |
-| Cambricon  |       |                 |                  |
-| Moore      |       |                 |                  |
-| Ascend     |       |                 |                  |
-
-<details>
-<summary>Full `pytest` output (optional)</summary>
-
-```text
-paste here
-```
-
-</details>
 
 ## Benchmark / Performance Impact
 
@@ -121,8 +92,9 @@ follow-up work intentionally left out of scope, etc.
 - [ ] Branch name follows `<type>/xxx-yyyy-zzzz` where `<type>` matches the PR title's Conventional Commits type and words are joined with hyphens (see `CONTRIBUTING.md` §Branches).
 - [ ] Each **commit** message follows Conventional Commits.
 - [ ] Small PR is a **single squashable commit**; or, for a large PR, every commit is meaningful, well-formed, and independently reviewable (see `CONTRIBUTING.md` §Pull Requests).
-- [ ] No stray merge commits from `master` — the branch is rebased cleanly on top of the current `master`.
+- [ ] No stray merge commits from `main` — the branch is rebased cleanly on top of the current `main`.
 - [ ] No `fixup!` / `squash!` / `wip` commits remain.
+- [ ] Existing PR/branch/commit that followed the legacy issue format.
 
 ### Scope and Design
 
@@ -143,56 +115,35 @@ follow-up work intentionally left out of scope, etc.
 ### C++ Specific (if C++ files changed)
 
 - [ ] Code follows the [Google C++ Style Guide](https://google.github.io/styleguide/cppguide.html) strictly.
-- [ ] `clang-format` (version **21**, per `.github/workflows/clang-format.yml`) has been run against all modified `.h`, `.cc`, `.cuh`, and `.mlu` files; the diff is clean.
-- [ ] `clang-tidy` concerns (per `.clang-tidy`) have been reviewed — no new warnings beyond the existing baseline.
-- [ ] Operator parameter order is **inputs first, outputs last**; attributes are between inputs and outputs; naming follows PyTorch → ONNX → CUDA API precedence (`CONTRIBUTING.md` §C++).
-- [ ] **No exceptions** are thrown. Error paths use `assert` with messages that include at least `__FILE__`, `__LINE__`, and `__func__` (`CONTRIBUTING.md` §C++).
 - [ ] Error and warning message wording follows the [LLVM Coding Standards](https://llvm.org/docs/CodingStandards.html#error-and-warning-messages) (`CONTRIBUTING.md` §C++).
-- [ ] Kernel files are named correctly: custom = `kernel` / `kernel_v2` / …; well-known algorithms use the algorithm name; library-based implementations use the library name (`CONTRIBUTING.md` §C++).
-- [ ] Kernel and kernel launcher are in **separate files**: launcher `.h`, kernel follows platform conventions (e.g. `.cuh` + `.cu`) even when non-templated (`CONTRIBUTING.md` §C++).
 - [ ] Constructor **initializer list order matches member declaration order** (`CONTRIBUTING.md` §C++).
-- [ ] Exactly **one blank line** between classes, between classes and functions, and between functions (`CONTRIBUTING.md` §C++).
-- [ ] Exactly **one blank line** between members (functions *and* variables) within a class (`CONTRIBUTING.md` §C++).
-- [ ] Exactly **one blank line** before and after the contents of a namespace (`CONTRIBUTING.md` §C++).
-- [ ] New operators added via `src/base/<op>.h` (inheriting `Operator<Op>`) with platform implementations under `src/<category>/<platform>/` inheriting the base (`CONTRIBUTING.md` §Adding an Operator).
 - [ ] No raw `new`/`delete`; RAII / smart pointers / existing allocators are used.
+- [ ] Changed files are formatted by `scripts/format.py`.
+- [ ] No changes/reference to `csrc/models/llama_legacy/`.
 
 ### Python Specific (if Python files changed)
 
-- [ ] Code is [PEP 8](https://peps.python.org/pep-0008/) compliant; `ruff check` passes cleanly on CI (see `.github/workflows/ruff.yml`).
-- [ ] `ruff format --check` passes cleanly — if not, run `ruff format` and commit the result.
+- [ ] Code is [PEP 8](https://peps.python.org/pep-0008/) compliant.
 - [ ] Comments are complete English sentences, starting with a capital letter and ending with punctuation; Markdown backticks are used for code references (`CONTRIBUTING.md` §Python).
-- [ ] Framework-specific conventions (e.g. lowercase `pytest.skip` messages without terminal period) are honored where applicable (`CONTRIBUTING.md` §Python).
-- [ ] **No blank line** between the function signature and the body when there is no docstring or comment (`CONTRIBUTING.md` §Python).
-- [ ] A blank line is present **before and after** `if`, `for`, and similar control-flow statements (`CONTRIBUTING.md` §Python).
-- [ ] A blank line appears **before** each `return`, except when it directly follows a control-flow statement (`CONTRIBUTING.md` §Python).
 - [ ] Docstrings (if any) follow [PEP 257](https://peps.python.org/pep-0257/) (`CONTRIBUTING.md` §Python).
-- [ ] Type hints are added / kept consistent with the surrounding code.
+- [ ] Changed files are formatted by `scripts/format.py`.
+- [ ] No changes/reference to `python/infinilm/auto_config.py`.
 
 ### Testing
 
-- [ ] `pytest` was run locally on **every supported platform** that this PR can affect, and the results are recorded in the "Test Results" table above (`CONTRIBUTING.md` §Pull Requests).
 - [ ] For any platform that could not be tested, an explicit reason is given in the table and a reviewer with access has been tagged.
-- [ ] New functionality has matching tests under `tests/` following `tests/test_add.py` / `tests/test_gemm.py` patterns (`CONTRIBUTING.md` §Adding an Operator).
-- [ ] Tests use `pytest.mark.parametrize` correctly: dependent parameters share one decorator (e.g. `@pytest.mark.parametrize("dtype, rtol, atol", …)`), independent parameters use separate decorators ordered by parameter declaration.
-- [ ] Where appropriate, `pytest.mark.auto_act_and_assert` is used and the test returns a `Payload` whose `func` and `ref` share the same calling convention.
-- [ ] Default `dtype` / `device` parameterization is relied on, or overridden with an explicit `pytest.mark.parametrize` when necessary.
-- [ ] Any new test that is flaky under parallelism is marked so, or documented to require `pytest -n 1`.
-- [ ] For bug fixes: a regression test has been added that fails on `master` and passes with this PR.
+- [ ] Passed single request test (`examples/test_infer.py`), or specify the reason for skipping.
+- [ ] Passed offline performance test (`examples/bench.py`), or specify the reason for skipping.
+- [ ] Passed sanity test (`test/bench/test_benchmark.py`), or specify the reason for skipping.
+- [ ] Passed service test (`python/infinilm/server/inference_server.py` + `scripts/test_perf.py`), or specify the reason for skipping.
 
 ### Build, CI, and Tooling
 
-- [ ] The project builds cleanly from a fresh directory with `pip install .[dev]` on at least one affected platform.
-- [ ] `compile_commands.json` still regenerates (CMake option `CMAKE_EXPORT_COMPILE_COMMANDS=ON` in `pyproject.toml` — required by the `code-lint` skill and `clang-tidy -p`).
-- [ ] New backends / devices have been added to auto-detection in `CMakeLists.txt` under `if(AUTO_DETECT_DEVICES)` **and** to `if(AUTO_DETECT_BACKENDS)` if applicable.
-- [ ] Only one CUDA-like GPU backend is selectable at a time — the existing mutual-exclusion check in `CMakeLists.txt` is not broken.
-- [ ] Both CI workflows (`clang-format.yml`, `ruff.yml`) are green locally (or expected to be green on CI).
-- [ ] No new runtime dependency was added without updating `pyproject.toml`'s `[project.optional-dependencies]` (or justified in the PR description).
+- [ ] The project builds cleanly from a fresh directory on at least one affected platform.
 
 ### Documentation
 
 - [ ] `README.md`, `CONTRIBUTING.md`, or inline docs updated when behavior, build flags, or developer workflow changed.
-- [ ] New operators, new dispatch helpers, or new public utilities are documented (docstring, header comment, or an addition to `CONTRIBUTING.md` §Some Code Explanations).
 - [ ] Any user-visible breaking change is called out explicitly under "Motivation" **and** in the commit/PR title with a `!` or `BREAKING CHANGE:` footer.
 
 ### Security and Safety
