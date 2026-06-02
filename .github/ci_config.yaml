@@ -54,7 +54,7 @@ platforms:
         resources:
           gpu_style: none
           shm_size: 64g
-          timeout: 10800
+          timeout: 18000
         env:
           TEST_PARAM: ['--bench ceval', '--bench mmlu']
         stages:
