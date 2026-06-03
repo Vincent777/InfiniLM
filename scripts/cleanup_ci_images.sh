@@ -182,7 +182,7 @@ for prefix in "${IMAGE_PREFIXES[@]}"; do
       continue
     fi
 
-    if docker rmi "${image_id}" >/dev/null 2>&1; then
+    if docker rmi -f "${image_id}" >/dev/null 2>&1; then
       log "Deleted ${name} (rank ${rank}/${total}, created ${created_at:-unknown})"
       ((deleted++)) || true
     else
