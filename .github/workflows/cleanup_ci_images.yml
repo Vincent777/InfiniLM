@@ -27,8 +27,7 @@ on:
           - metax
           - moore
           - cambricon
-          - iluvatar
-          - ascend
+          - hygon
 
 jobs:
   cleanup:
