@@ -34,6 +34,38 @@ log() {
   printf '[%s] %s\n' "$(date -u '+%Y-%m-%d %H:%M:%S UTC')" "$*"
 }
 
+image_created_epoch() {
+  local image_id="$1"
+  local created_at="$2"
+  local epoch=""
+
+  if [[ -n "${created_at}" ]]; then
+    epoch=$(date -d "${created_at% UTC}" +%s 2>/dev/null) \
+      || epoch=$(date -d "${created_at}" +%s 2>/dev/null) \
+      || true
+  fi
+
+  if [[ -z "${epoch}" ]]; then
+    local inspect_created
+    inspect_created=$(docker inspect --format '{{.Created}}' "${image_id}" 2>/dev/null) || return 1
+    epoch=$(date -d "${inspect_created}" +%s 2>/dev/null) || return 1
+  fi
+
+  printf '%s' "${epoch}"
+}
+
+image_display_name() {
+  local image_id="$1"
+  local repository="$2"
+  local tag="$3"
+
+  if [[ -n "${repository}" && -n "${tag}" && "${tag}" != "<none>" ]]; then
+    printf '%s:%s' "${repository}" "${tag}"
+  else
+    printf '%s' "${image_id}"
+  fi
+}
+
 while [[ $# -gt 0 ]]; do
   case "$1" in
     --platform)
@@ -104,23 +136,24 @@ for prefix in "${IMAGE_PREFIXES[@]}"; do
   log "Scanning ${prefix}:*"
 
   tmpfile=$(mktemp)
-  trap 'rm -f "${tmpfile}"' RETURN
+  # shellcheck disable=SC2064
+  trap "rm -f '${tmpfile}'" EXIT
 
-  while IFS=$'\t' read -r image_id repository tag created_at; do
+  while IFS='|' read -r image_id repository tag created_at; do
     [[ -z "${image_id}" ]] && continue
     [[ "${tag}" == "<none>" ]] && continue
 
-    created_epoch=$(date -d "${created_at% UTC}" +%s 2>/dev/null) || {
-      log "WARN: skip ${repository}:${tag} (cannot parse created time: ${created_at})"
+    created_epoch=$(image_created_epoch "${image_id}" "${created_at}") || {
+      log "WARN: skip $(image_display_name "${image_id}" "${repository}" "${tag}") (cannot determine created time)"
       ((failed++)) || true
       continue
     }
 
-    printf '%s\t%s\t%s\t%s\t%s\n' \
+    printf '%s|%s|%s|%s|%s\n' \
       "${created_epoch}" "${image_id}" "${repository}" "${tag}" "${created_at}"
   done < <(
     docker images \
-      --format '{{.ID}}\t{{.Repository}}\t{{.Tag}}\t{{.CreatedAt}}' \
+      --format '{{.ID}}|{{.Repository}}|{{.Tag}}|{{.CreatedAt}}' \
       --filter "reference=${prefix}"
   ) >"${tmpfile}"
 
@@ -128,38 +161,38 @@ for prefix in "${IMAGE_PREFIXES[@]}"; do
   if [[ "${total}" -eq 0 ]]; then
     log "No images found for ${prefix}"
     rm -f "${tmpfile}"
-    trap - RETURN
+    trap - EXIT
     continue
   fi
 
   rank=0
-  while IFS=$'\t' read -r created_epoch image_id repository tag created_at; do
+  while IFS='|' read -r created_epoch image_id repository tag created_at; do
     ((rank++)) || true
-    ref="${repository}:${tag}"
+    name=$(image_display_name "${image_id}" "${repository}" "${tag}")
 
     if ((rank <= KEEP_COUNT)); then
-      log "KEEP ${ref} (rank ${rank}/${total}, created ${created_at})"
+      log "KEEP ${name} (rank ${rank}/${total}, created ${created_at:-unknown})"
       ((kept++)) || true
       continue
     fi
 
     if $DRY_RUN; then
-      log "WOULD DELETE ${ref} (rank ${rank}/${total}, created ${created_at})"
+      log "WOULD DELETE ${name} (rank ${rank}/${total}, created ${created_at:-unknown})"
       ((deleted++)) || true
       continue
     fi
 
-    if docker rmi "${ref}" >/dev/null 2>&1; then
-      log "Deleted ${ref} (rank ${rank}/${total}, created ${created_at})"
+    if docker rmi "${image_id}" >/dev/null 2>&1; then
+      log "Deleted ${name} (rank ${rank}/${total}, created ${created_at:-unknown})"
       ((deleted++)) || true
     else
-      log "WARN: failed to delete ${ref} (image may be in use)"
+      log "WARN: failed to delete ${name} (image may be in use)"
       ((failed++)) || true
     fi
-  done < <(sort -t$'\t' -k1,1nr "${tmpfile}")
+  done < <(sort -t'|' -k1,1nr "${tmpfile}")
 
   rm -f "${tmpfile}"
-  trap - RETURN
+  trap - EXIT
 done
 
 log "Done. removed=${deleted} kept=${kept} failed=${failed}"
