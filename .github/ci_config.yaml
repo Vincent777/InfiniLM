@@ -11,7 +11,7 @@ platforms:
       dockerfile: images/nvidia/
       build_args:
         BASE_IMAGE: nvcr.io/nvidia/pytorch:25.12-py3
-        CUDA_ARCH: sm_80
+        CUDA_ARCH: sm_80,sm_86,sm_89,sm_90
         APT_MIRROR: https://mirrors.tuna.tsinghua.edu.cn/ubuntu
         PIP_INDEX_URL: https://pypi.org/simple
         InfiniCore_BRANCH: main
