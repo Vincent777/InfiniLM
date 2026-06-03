@@ -2,14 +2,14 @@ name: Cleanup CI Docker Images
 
 on:
   schedule:
-    # Daily at 03:00 Beijing time (UTC+8) = 19:00 UTC previous calendar day
-    - cron: "0 19 * * *"
+    # Every hour at minute 0 (UTC)
+    - cron: "0 * * * *"
   workflow_dispatch:
     inputs:
-      retention_days:
-        description: Retention in days
+      keep_count:
+        description: Number of newest images to keep per prefix
         required: false
-        default: "3"
+        default: "5"
         type: string
       dry_run:
         description: Dry run only (list without deleting)
@@ -49,10 +49,10 @@ jobs:
 
       - name: Cleanup old CI Docker images
         env:
-          RETENTION_DAYS: ${{ github.event.inputs.retention_days || '3' }}
+          KEEP_COUNT: ${{ github.event.inputs.keep_count || '5' }}
           DRY_RUN: ${{ github.event.inputs.dry_run || 'false' }}
         run: |
-          args=(--platform "${{ matrix.platform }}" --days "${RETENTION_DAYS}")
+          args=(--platform "${{ matrix.platform }}" --count "${KEEP_COUNT}")
           if [[ "${DRY_RUN}" == "true" ]]; then
             args+=(--dry-run)
           fi
