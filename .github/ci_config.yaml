@@ -182,7 +182,7 @@ platforms:
           shm_size: 64g
           timeout: 3600
         env:
-          TEST_PARAM: ['--bench ceval', '--bench mmlu']
+          TEST_PARAM: ['--bench ceval --subject accountant', '--bench mmlu --subject abstract_algebra']
         stages:
           - name: test
             run: python InfiniLM/test/bench/test_benchmark.py --device cambricon --model /data-aisoft/mechdancer/models/9g_8b_thinking/ --backend cpp --max-new-tokens 5 --cache-dir /data-aisoft/pepe/datasets/ --split=val <TEST_PARAM>
