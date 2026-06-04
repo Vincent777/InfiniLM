@@ -139,7 +139,7 @@ platforms:
     image:
       dockerfile: images/cambricon/
       build_args:
-        BASE_IMAGE: cambricon/pytorch:v1.25.3-torch2.1-anolisos8.8-py310
+        BASE_IMAGE: pepe_working:latest
         APT_MIRROR: https://mirrors.tuna.tsinghua.edu.cn/ubuntu
         PIP_INDEX_URL: https://pypi.org/simple
         InfiniCore_BRANCH: main
