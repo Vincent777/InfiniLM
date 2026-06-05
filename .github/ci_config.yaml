@@ -57,7 +57,7 @@ platforms:
           shm_size: 64g
           timeout: 3600
         env:
-          TEST_PARAM: ['default', '--enable-paged-attn --enable-graph']
+          TEST_PARAM: ['--bench mmlu', '--bench ceval --enable-paged-attn --enable-graph']
         stages:
           - name: test
             run: python InfiniLM/test/bench/test_benchmark.py --device nvidia --model /data-aisoft/mechdancer/models/9g_8b_thinking/ --bench mmlu --backend cpp --max-new-tokens 5 --cache-dir /data-aisoft/pepe/datasets/ --split=val <TEST_PARAM>
@@ -309,4 +309,3 @@ platforms:
         stages:
           - name: test
             run: python InfiniLM/scripts/test_perf.py --verbose
-  
