@@ -118,7 +118,7 @@ platforms:
         BASE_IMAGE: sh-harbor.mthreads.com/mcctest/vllm_musa:20251112_hygon
         APT_MIRROR: https://mirrors.tuna.tsinghua.edu.cn/ubuntu
         PIP_INDEX_URL: https://pypi.org/simple
-        InfiniCore_BRANCH: musa_silu_and_mul
+        InfiniCore_BRANCH: main
     docker_args:
       - "--user=root"
       - "--network=host"
@@ -164,7 +164,7 @@ platforms:
           TEST_PARAM: ['--bench ceval', '--bench mmlu']
         stages:
           - name: test
-            run: python InfiniLM/test/bench/test_benchmark.py --moore /data-aisoft/zhushuang/models/9g_8b_thinking_llama/ --subject all --backend cpp --ndev 1 --output_csv 8b_mmlu_paged_results.csv --split val --max-new-tokens 5 --cache_dir /data-aisoft/pepe/datasets/ <TEST_PARAM>
+            run: python InfiniLM/test/bench/test_benchmark.py --device moore --model /data-aisoft/zhushuang/models/9g_8b_thinking_llama/ --subject all --backend cpp --tp 1 --output_csv 8b_mmlu_paged_results.csv --split val --enable-paged-attn <TEST_PARAM>
       gpu_servicetest:
         type: servicetest
         resources:
