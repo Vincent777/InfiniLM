@@ -34,7 +34,7 @@ jobs:
     uses: InfiniTensor/ci/.github/workflows/cleanup_ci_images.yml@infiniCore_ci
     with:
       keep_count: ${{ github.event.inputs.keep_count || '5' }}
-      dry_run: ${{ github.event.inputs.dry_run || false }}
+      dry_run: ${{ github.event.inputs.dry_run == true }}
       platform: ${{ github.event.inputs.platform || 'all' }}
       ci_ref: infiniCore_ci
     secrets: inherit
