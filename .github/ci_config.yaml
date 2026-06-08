@@ -174,7 +174,7 @@ platforms:
         env:
           MODEL_LIST: 9g_8b_thinking
           ENGINE: InfiniLM
-          TEST_PARAM: ['default', '--num-blocks=512 --block-size=64', '--enable-graph --num-blocks=512 --block-size=64']
+          TEST_PARAM: ['default', '--num-blocks=1024 --block-size=256', '--enable-graph --enable-paged-attn --num-blocks=1024 --block-size=256']
         stages:
           - name: test
             run: python InfiniLM/scripts/test_perf.py --verbose
