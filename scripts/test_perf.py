@@ -166,7 +166,10 @@ async def run_benchmark(server_port, verbose=False):
     print(sep)
     print(f"{'Average latency':<{width_label}}: {avg_latency:.2f} s")
     print(f"{'Average TTFT':<{width_label}}: {avg_ttft:.2f} s")
-    print(f"{'Avg time per token':<{width_label}}: {avg_ms_per_token:.2f} ms/token")
+    if avg_ms_per_token is not None:
+        print(f"{'Avg time per token':<{width_label}}: {avg_ms_per_token:.2f} ms/token")
+    else:
+        print(f"{'Avg time per token':<{width_label}}: N/A (no token generated)")
     print(
         f"{'Avg Token generation speed':<{width_label}}: {avg_tokens_per_second:.2f} tokens/s"
     )
